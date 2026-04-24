@@ -35,7 +35,20 @@ struct ContentView: View {
                 .signInWithAppleButtonStyle(.black)
                 .frame(height: 50)
                 .padding()
+            
+                Button(action: authenticateWithBiometrics) {
+                    Text("Login with Touch/Face ID")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.purple)
+                        .foregroundStyle(Color.white)
+                        .cornerRadius(7)
+                }
             }
+        }
+        .alert(isPresented: $showError) {
+            //show an alert if authentication fails
+            Alert(title: Text("Authentication Error"), message: Text(errorMessage ?? "Unknown Error"), dismissButton: .default(Text("OK")))
         }
         .padding()
     }
@@ -52,6 +65,31 @@ struct ContentView: View {
             errorMessage = error.localizedDescription
             showError = true
             print("Apple ID error: \(error.localizedDescription)")
+        }
+    }
+    
+    func authenticateWithBiometrics() {
+        let context = LAContext()
+        var error: NSError?
+        //check if biometric authentication is available
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+            let reason = "Authonticate with Face ID or Touch ID"
+            //attemp to authenticate w/ biometrics
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) {
+                success, error in
+                DispatchQueue.main.async {
+                    if success {
+                        //mark as authenticated
+                        isAuthenticated = true
+                    } else {
+                        //show error with authenticated
+                        errorMessage = error?.localizedDescription ?? "Biometric Failure"
+                        showError = true
+                    }
+                }
+            }
+        } else { //show an error if biometric is not available
+            
         }
     }
 }
