@@ -89,7 +89,8 @@ struct ContentView: View {
                 }
             }
         } else { //show an error if biometric is not available
-            
+            errorMessage = error?.localizedDescription ?? "Biometric failure"
+                       showError = true
         }
     }
 }
